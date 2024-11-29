@@ -237,6 +237,7 @@ const sendMail = async (to, type, data) => {
     } else if (type === "passwordReset") {
       const BASE_URL = process.env.BASE_URL;
       const resetLink = `${BASE_URL}/reset-password/${data.token}`;
+
       subject = "Reset Your Password";
       htmlContent = `
         <div style="font-family: Arial, sans-serif; background-color: #F6F8FA; padding: 40px; text-align: left;">

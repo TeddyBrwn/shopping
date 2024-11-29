@@ -36,7 +36,7 @@ function ProductList() {
   const fetchProducts = async () => {
     try {
       const response = await API.get("/admin/products");
-      console.log("Products:", response.data); // Debug log sản phẩm
+      console.log("Danh sách sản phẩm từ API:", response.data); // Log danh sách sản phẩm
       setProducts(response.data);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -56,23 +56,45 @@ function ProductList() {
   };
 
   // Add or edit product
+  // const handleSaveProduct = async (product) => {
+  //   try {
+  //     console.log("Dữ liệu sản phẩm trước khi lưu:", product); // Log dữ liệu gửi đi
+  //     if (product.id) {
+  //       await API.put(`/admin/product/${product.id}`, product);
+  //     } else {
+  //       await API.post("/admin/product", product);
+  //     }
+  //     setIsFormOpen(false);
+  //     fetchProducts(); // Refresh product list
+  //   } catch (error) {
+  //     console.error("Error saving product:", error);
+  //   }
+  // };
   const handleSaveProduct = async (product) => {
     try {
+      let response;
       if (product.id) {
-        await API.put(`/admin/product/${product.id}`, product);
+        console.log(`Gửi PUT request đến: /admin/product/${product.id}`);
+        response = await API.put(`/admin/product/${product.id}`, product);
       } else {
-        await API.post("/admin/product", product);
+        console.log("Gửi POST request đến: /admin/product");
+        response = await API.post("/admin/product", product);
       }
-      setIsFormOpen(false);
-      fetchProducts(); // Refresh product list
+
+      console.log("Phản hồi từ API sau khi lưu:", response.data); // Log response từ backend
+
+      setIsFormOpen(false); // Đóng modal
+      fetchProducts(); // Làm mới danh sách sản phẩm
     } catch (error) {
-      console.error("Error saving product:", error);
+      console.error("Lỗi khi lưu sản phẩm:", error);
     }
   };
 
   // Delete product
   const handleDeleteProduct = async (id) => {
     try {
+      console.log("ID sản phẩm cần xóa:", id); // Log ID sản phẩm
+
       await API.delete(`/admin/product/${id}`);
       fetchProducts(); // Refresh product list
     } catch (error) {
@@ -88,6 +110,7 @@ function ProductList() {
 
   // Open form to edit an existing product
   const handleEditProduct = (product) => {
+    console.log("Sản phẩm được chọn để sửa:", product); // Log sản phẩm
     setSelectedProduct(product);
     setIsFormOpen(true);
   };
@@ -196,13 +219,13 @@ function ProductList() {
                       className="action-icon"
                       onClick={() => handleEditProduct(product)}
                     >
-                      <FontAwesomeIcon icon={faEdit} title="Sửa" />
+                      <FontAwesomeIcon icon={faEdit} title="Sửa" /> Sửa
                     </button>
                     <button
                       className="action-icon"
                       onClick={() => handleDeleteProduct(product._id)}
                     >
-                      <FontAwesomeIcon icon={faTrash} title="Xóa" />
+                      <FontAwesomeIcon icon={faTrash} title="Xóa" /> Xoá
                     </button>
                   </td>
                 </tr>
