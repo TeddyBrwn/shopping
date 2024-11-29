@@ -16,91 +16,101 @@ function UserList() {
 
   const navigate = useNavigate();
 
-  // Chuyển đổi menu
+  // Toggle menu
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  // Xử lý đăng xuất
+  // Logout handler
   const handleLogout = () => {
-    console.log("Đăng xuất thành công");
+    console.log("Logged out successfully");
     navigate("/admin/login");
   };
 
-  // Lấy danh sách người dùng từ API
+  // Fetch users from API
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await API.get("/admin/users");
+      console.log("Fetched Users:", response.data);
+      setUsers(response.data || []);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      try {
-        const response = await API.get("/admin/users");
-        console.log(response.data); // Kiểm tra dữ liệu trả về
-        setUsers(response.data || []);
-      } catch (error) {
-        console.error("Lỗi khi lấy danh sách người dùng:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchUsers();
   }, []);
 
-  // Chỉnh sửa người dùng
+  // Edit user
   const handleEditUser = async (updatedUser) => {
+    console.log("Editing User:", updatedUser);
     if (!updatedUser._id) {
-      alert("ID người dùng không hợp lệ!");
+      alert("Invalid user ID!");
       return;
     }
 
     try {
-      const response = await API.put(`/admin/user/${updatedUser._id}`, updatedUser);  // Dùng _id nếu ID trả về là _id
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user._id === updatedUser._id ? response.data : user
-        )
+      const response = await API.put(
+        `/admin/user/${updatedUser._id}`,
+        updatedUser
       );
-      alert("Cập nhật thành công!");
+      console.log("Response after update:", response.data);
+
+      // Ensure response has user data
+      const updatedUserData = response.data.user || response.data;
+
+      // Update state
+      setUsers((prevUsers) => {
+        const updatedUsers = prevUsers.map((user) =>
+          user._id === updatedUser._id ? { ...user, ...updatedUserData } : user
+        );
+        console.log("Updated Users in State:", updatedUsers);
+        return updatedUsers;
+      });
+
+      alert("Cập nhật người dùng thành công ✓");
     } catch (error) {
-      console.error("Lỗi khi chỉnh sửa người dùng:", error);
-      alert("Cập nhật thất bại. Vui lòng thử lại.");
+      console.error("Error updating user:", error);
+      alert("Update failed. Please try again.");
     }
     setEditingUser(null);
     setIsFormOpen(false);
   };
 
-  // Xóa người dùng
+  // Delete user
   const handleDeleteUser = async () => {
+    console.log("Deleting User with ID:", confirmDelete.id);
     if (!confirmDelete.id) {
-      alert("ID người dùng không hợp lệ!");
+      alert("Invalid user ID!");
       return;
     }
 
     try {
-      await API.delete(`/admin/user/${confirmDelete.id}`);  // Dùng _id nếu ID trả về là _id
+      await API.delete(`/admin/user/${confirmDelete.id}`);
+      console.log("User deleted successfully");
       setUsers((prevUsers) =>
-        prevUsers.filter((user) => user._id !== confirmDelete.id)  // Dùng _id nếu ID trả về là _id
+        prevUsers.filter((user) => user._id !== confirmDelete.id)
       );
-      alert("Xóa thành công!");
+      alert("User deleted successfully!");
     } catch (error) {
-      console.error("Lỗi khi xóa người dùng:", error);
-      alert("Xóa thất bại. Vui lòng thử lại.");
+      console.error("Error deleting user:", error);
+      alert("Delete failed. Please try again.");
     }
     setConfirmDelete({ show: false, id: null });
   };
 
-  // Mở form chỉnh sửa người dùng
+  // Open edit form
   const openEditForm = (user) => {
-    if (!user._id) {
-      alert("ID người dùng không hợp lệ!");
-      return;
-    }
+    console.log("Opening edit form for user:", user);
     setEditingUser(user);
     setIsFormOpen(true);
   };
 
-  // Mở modal xác nhận xóa
+  // Open delete confirmation
   const openDeleteConfirm = (id) => {
-    if (!id) {
-      alert("ID người dùng không hợp lệ!");
-      return;
-    }
+    console.log("Opening delete confirmation for user ID:", id);
     setConfirmDelete({ show: true, id });
   };
 
@@ -108,7 +118,7 @@ function UserList() {
     <div className="users-container">
       {/* Header */}
       <header className="home-header">
-        <div className="logo">Quản lý người dùng</div>
+        <div className="logo">QUẢN LÝ NGƯỜI DÙNG</div>
         <div className="left-section">
           {!isMenuOpen ? (
             <div className="menu-button" onClick={toggleMenu}>
@@ -154,35 +164,35 @@ function UserList() {
                 className="dropdown-button"
                 onClick={() => navigate("/admin/users")}
               >
-                Chỉnh sửa người dùng
+                Edit Users
               </button>
               <button className="dropdown-button" onClick={handleLogout}>
-                Đăng xuất
+                Logout
               </button>
             </div>
           )}
         </div>
       </header>
 
-      {/* Danh sách người dùng */}
+      {/* Users Table */}
       <div className="users-content">
-        <h1>Danh sách người dùng</h1>
+        <h1></h1>
         {loading ? (
-          <p>Đang tải...</p>
+          <p>Loading...</p>
         ) : (
           <table className="users-table">
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Tên</th>
+                <th>Name</th>
                 <th>Email</th>
-                <th>Vai trò</th>
-                <th>Hành động</th>
+                <th>Role</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr key={user._id}>  {/* Dùng _id nếu dữ liệu trả về là _id */}
+              {users.map((user, index) => (
+                <tr key={user._id || index}>
                   <td>{user._id}</td>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
@@ -192,13 +202,13 @@ function UserList() {
                       className="action-icon"
                       onClick={() => openEditForm(user)}
                     >
-                      <FontAwesomeIcon icon={faEdit} title="Sửa" />
+                      <FontAwesomeIcon icon={faEdit} title="Edit" />
                     </button>
                     <button
                       className="action-icon"
-                      onClick={() => openDeleteConfirm(user._id)} 
+                      onClick={() => openDeleteConfirm(user._id)}
                     >
-                      <FontAwesomeIcon icon={faTrash} title="Xóa" />
+                      <FontAwesomeIcon icon={faTrash} title="Delete" />
                     </button>
                   </td>
                 </tr>
@@ -208,15 +218,11 @@ function UserList() {
         )}
       </div>
 
-      {/* Modal và form chỉnh sửa */}
+      {/* Edit User Modal */}
       {isFormOpen && (
         <div className="modal-overlay">
           <div className="modal-box">
-            <h2>
-              {editingUser
-                ? "Chỉnh sửa thông tin người dùng"
-                : "Thêm người dùng mới"}
-            </h2>
+            <h2>Edit User Information</h2>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -224,7 +230,7 @@ function UserList() {
               }}
             >
               <div className="form-group">
-                <label htmlFor="name">Tên:</label>
+                <label htmlFor="name">Name:</label>
                 <input
                   type="text"
                   id="name"
@@ -235,7 +241,7 @@ function UserList() {
                       name: e.target.value,
                     }))
                   }
-                  placeholder="Nhập tên người dùng"
+                  placeholder="Enter user name"
                   required
                 />
               </div>
@@ -251,12 +257,12 @@ function UserList() {
                       email: e.target.value,
                     }))
                   }
-                  placeholder="Nhập email người dùng"
+                  placeholder="Enter user email"
                   required
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="role">Vai trò:</label>
+                <label htmlFor="role">Role:</label>
                 <select
                   id="role"
                   value={editingUser?.role || ""}
@@ -273,7 +279,7 @@ function UserList() {
               </div>
               <div className="confirm-actions">
                 <button type="submit" className="save-button">
-                  Lưu
+                  Save
                 </button>
                 <button
                   type="button"
@@ -283,7 +289,7 @@ function UserList() {
                     setEditingUser(null);
                   }}
                 >
-                  Hủy
+                  Cancel
                 </button>
               </div>
             </form>
@@ -291,24 +297,21 @@ function UserList() {
         </div>
       )}
 
-      {/* Modal xác nhận xóa */}
+      {/* Delete Confirmation Modal */}
       {confirmDelete.show && (
         <div className="modal-overlay">
           <div className="modal-box">
-            <h2>Xác nhận xóa người dùng</h2>
-            <p>Bạn có chắc chắn muốn xóa người dùng này không?</p>
+            <h2>Confirm Delete</h2>
+            <p>Are you sure you want to delete this user?</p>
             <div className="confirm-actions">
-              <button
-                onClick={handleDeleteUser}
-                className="delete-button"
-              >
-                Xóa
+              <button onClick={handleDeleteUser} className="delete-button">
+                Delete
               </button>
               <button
                 onClick={() => setConfirmDelete({ show: false, id: null })}
                 className="cancel-button"
               >
-                Hủy
+                Cancel
               </button>
             </div>
           </div>

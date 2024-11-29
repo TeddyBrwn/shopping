@@ -1,53 +1,43 @@
 import React, { useState, useEffect } from "react";
-import API from "../../api/api"; // Import API instance đã cấu hình
-import "./Modal.css"; // Import CSS cho modal
+import API from "../../api/api";
+import "./Modal.css";
 
-function ProductForm({ product = {}, onSave, onCancel }) {
-  console.log("Dữ liệu sản phẩm nhận được trong modal:", product); // Log sản phẩm khi nhận props
+function ProductForm({ product = {}, actionType, onSave, onCancel }) {
   const [formValues, setFormValues] = useState({
     name: product.name || "",
     price: product.price || 0,
     stock: product.stock || 0,
-    category: product.category || "", // Đây sẽ là ObjectId của category
-    description: product.description || "", // Thêm trường mô tả
+    category: product.category || "",
+    description: product.description || "",
     attributes: product.attributes || [
       {
         key: "Màu",
         value:
           product.attributes?.find((attr) => attr.key === "Màu")?.value ||
           "#000000",
-      }, // Mặc định là màu đen
+      },
       {
         key: "Kích thước",
         value:
           product.attributes?.find((attr) => attr.key === "Kích thước")
             ?.value || "M",
-      }, // Mặc định là M
+      },
     ],
-    image: null, // Thêm trường hình ảnh
+    image: null,
   });
-  useEffect(() => {
-    console.log("Giá trị formValues đã thay đổi:", formValues); // Log mỗi lần formValues thay đổi
-  }, [formValues]);
+  const [categories, setCategories] = useState([]);
+  const [errors, setErrors] = useState({});
 
-  const [categories, setCategories] = useState([]); // Lưu danh mục
-  const [errors, setErrors] = useState({}); // Lưu lỗi
-
-  // Lấy danh mục từ API khi component được mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await API.get("/admin/categories");
         setCategories(response.data);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
+      } catch (error) {}
     };
-
     fetchCategories();
   }, []);
 
-  // Validate dữ liệu
   const validateForm = () => {
     const newErrors = {};
     if (!formValues.name.trim()) {
@@ -69,43 +59,26 @@ function ProductForm({ product = {}, onSave, onCancel }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle thay đổi thuộc tính màu và kích thước
   const handleAttributeChange = (index, field, value) => {
     const updatedAttributes = [...formValues.attributes];
     updatedAttributes[index][field] = value;
     setFormValues({ ...formValues, attributes: updatedAttributes });
   };
 
-  // Handle thay đổi thông tin sản phẩm
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Thay đổi giá trị trong form - ${name}:`, value); // Log giá trị thay đổi
     setFormValues((prevValues) => ({
       ...prevValues,
       [name]: value,
     }));
   };
 
-  // Handle submit form
-  // const handleSubmit = () => {
-  //   console.log("Dữ liệu trước khi gửi lưu:", formValues); // Log dữ liệu từ form
-  //   if (validateForm()) {
-  //     onSave(formValues); // Call save callback function
-  //   }
-  // };
-
   const handleSubmit = () => {
-    console.log("Nút Lưu được nhấn!"); // Log sự kiện nhấn nút
-    console.log("Dữ liệu form trước khi lưu:", formValues); // Log dữ liệu hiện tại của form
     if (validateForm()) {
-      console.log("Dữ liệu hợp lệ, gửi về callback onSave");
-      onSave({ ...formValues, id: product._id }); // Gửi dữ liệu lên `ProductList`
-    } else {
-      console.log("Dữ liệu không hợp lệ, kiểm tra lại form."); // Log lỗi nếu validate không đạt
+      onSave({ ...formValues, id: product._id });
     }
   };
 
-  // Danh sách màu cơ bản
   const basicColors = [
     "#FF0000",
     "#00FF00",
@@ -122,7 +95,9 @@ function ProductForm({ product = {}, onSave, onCancel }) {
         <button className="modal-close" onClick={onCancel}>
           &times;
         </button>
-        <div className="modal-header">Thêm Sản Phẩm</div>
+        <div className="modal-header">
+          {actionType === "add" ? "Thêm Sản Phẩm" : "Sửa Sản Phẩm"}
+        </div>
         <form>
           <div className="form-group">
             <label htmlFor="name">Tên sản phẩm</label>
@@ -176,8 +151,6 @@ function ProductForm({ product = {}, onSave, onCancel }) {
               <div className="error-text">{errors.category}</div>
             )}
           </div>
-
-          {/* Màu sắc */}
           <div className="form-group">
             <label htmlFor="color">Màu sắc</label>
             <div className="color-picker">
@@ -193,8 +166,6 @@ function ProductForm({ product = {}, onSave, onCancel }) {
               ))}
             </div>
           </div>
-
-          {/* Kích thước */}
           <div className="form-group">
             <label htmlFor="size">Kích thước</label>
             <select
@@ -212,7 +183,6 @@ function ProductForm({ product = {}, onSave, onCancel }) {
               <option value="XXL">XXL</option>
             </select>
           </div>
-
           <div className="form-group">
             <label htmlFor="image">Hình ảnh sản phẩm</label>
             <input
@@ -226,7 +196,6 @@ function ProductForm({ product = {}, onSave, onCancel }) {
             />
             {errors.image && <div className="error-text">{errors.image}</div>}
           </div>
-
           <div className="form-group">
             <button
               type="button"
@@ -235,13 +204,7 @@ function ProductForm({ product = {}, onSave, onCancel }) {
             >
               Lưu
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                console.log("Modal bị đóng"); // Log khi modal đóng
-                onCancel();
-              }}
-            >
+            <button type="button" onClick={onCancel}>
               Hủy
             </button>
           </div>

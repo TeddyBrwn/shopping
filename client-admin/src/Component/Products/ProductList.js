@@ -17,9 +17,9 @@ function ProductList() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [actionType, setActionType] = useState("");
   const navigate = useNavigate();
 
-  // Check token and redirect to login if not available
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -32,14 +32,11 @@ function ProductList() {
     fetchProducts();
   }, []);
 
-  // Fetch products from API
   const fetchProducts = async () => {
     try {
       const response = await API.get("/admin/products");
-      console.log("Danh sách sản phẩm từ API:", response.data); // Log danh sách sản phẩm
       setProducts(response.data);
     } catch (error) {
-      console.error("Error fetching products:", error);
       if (error.response?.status === 401) {
         alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
         navigate("/admin/login");
@@ -47,81 +44,50 @@ function ProductList() {
     }
   };
 
-  // Helper function to get category name
   const getCategoryName = (product) => {
     if (!product.category || !product.category.name) {
-      return "Không xác định"; // Nếu không có danh mục
+      return "Không xác định";
     }
-    return product.category.name; // Lấy trực tiếp tên danh mục
+    return product.category.name;
   };
 
-  // Add or edit product
-  // const handleSaveProduct = async (product) => {
-  //   try {
-  //     console.log("Dữ liệu sản phẩm trước khi lưu:", product); // Log dữ liệu gửi đi
-  //     if (product.id) {
-  //       await API.put(`/admin/product/${product.id}`, product);
-  //     } else {
-  //       await API.post("/admin/product", product);
-  //     }
-  //     setIsFormOpen(false);
-  //     fetchProducts(); // Refresh product list
-  //   } catch (error) {
-  //     console.error("Error saving product:", error);
-  //   }
-  // };
   const handleSaveProduct = async (product) => {
     try {
-      let response;
       if (product.id) {
-        console.log(`Gửi PUT request đến: /admin/product/${product.id}`);
-        response = await API.put(`/admin/product/${product.id}`, product);
+        await API.put(`/admin/product/${product.id}`, product);
       } else {
-        console.log("Gửi POST request đến: /admin/product");
-        response = await API.post("/admin/product", product);
+        await API.post("/admin/product", product);
       }
-
-      console.log("Phản hồi từ API sau khi lưu:", response.data); // Log response từ backend
-
-      setIsFormOpen(false); // Đóng modal
-      fetchProducts(); // Làm mới danh sách sản phẩm
-    } catch (error) {
-      console.error("Lỗi khi lưu sản phẩm:", error);
-    }
+      setIsFormOpen(false);
+      fetchProducts();
+    } catch (error) {}
   };
 
-  // Delete product
   const handleDeleteProduct = async (id) => {
     try {
-      console.log("ID sản phẩm cần xóa:", id); // Log ID sản phẩm
-
       await API.delete(`/admin/product/${id}`);
-      fetchProducts(); // Refresh product list
-    } catch (error) {
-      console.error("Error deleting product:", error);
-    }
+      fetchProducts();
+    } catch (error) {}
   };
 
-  // Open form to add a new product
   const handleAddProduct = () => {
-    setSelectedProduct({}); // Đảm bảo không truyền null
+    setSelectedProduct({});
+    setActionType("add");
     setIsFormOpen(true);
   };
 
-  // Open form to edit an existing product
   const handleEditProduct = (product) => {
-    console.log("Sản phẩm được chọn để sửa:", product); // Log sản phẩm
     setSelectedProduct(product);
+    setActionType("edit");
     setIsFormOpen(true);
   };
 
-  // Close form
   const handleCancel = () => {
     setIsFormOpen(false);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Clear token on logout
+    localStorage.removeItem("token");
     navigate("/admin/login");
   };
 
@@ -241,7 +207,8 @@ function ProductList() {
 
       {isFormOpen && (
         <ProductForm
-          product={selectedProduct || {}} // Truyền sản phẩm hoặc đối tượng rỗng
+          product={selectedProduct || {}}
+          actionType={actionType}
           onSave={handleSaveProduct}
           onCancel={handleCancel}
         />
