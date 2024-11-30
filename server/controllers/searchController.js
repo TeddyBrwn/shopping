@@ -1,6 +1,9 @@
 const Product = require("../models/product");
 const Category = require("../models/category");
 const mongoose = require("mongoose");
+require("dotenv").config(); // Sử dụng dotenv để lấy BASE_URL từ file .env
+
+const BASE_URL = process.env.BASE_URL || "http://localhost:3000"; // URL gốc
 
 // Lấy danh sách sản phẩm theo bộ lọc và sắp xếp
 const getFilteredProducts = async (req, res) => {
@@ -19,94 +22,70 @@ const getFilteredProducts = async (req, res) => {
       size, // Lọc theo Kích thước
     } = req.query;
 
-    let query = {};
+    // Bộ lọc tìm kiếm
+    const filter = {};
+    if (search) filter.name = { $regex: search, $options: "i" }; // Tìm kiếm theo tên
+    if (category) filter.category = category; // Lọc theo danh mục
+    if (minPrice) filter.price = { $gte: minPrice }; // Giá thấp nhất
+    if (maxPrice) filter.price = { ...filter.price, $lte: maxPrice }; // Giá cao nhất
+    if (inStock) filter.inStock = inStock === "true"; // Lọc theo hàng tồn kho
+    if (color) filter.color = color; // Lọc theo màu sắc
+    if (size) filter.size = size; // Lọc theo kích thước
 
-    // Tìm kiếm theo từ khóa
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ];
-    }
+    // Lấy danh sách sản phẩm từ cơ sở dữ liệu
+    const products = await Product.find(filter)
+      .populate("category", "name") // Lấy thông tin danh mục
+      .sort({ [sortBy]: order === "asc" ? 1 : -1 }) // Sắp xếp
+      .skip((page - 1) * limit) // Phân trang
+      .limit(Number(limit));
 
-    // Lọc theo danh mục
-    if (category) {
-      const categoryDoc = await Category.findOne({
-        $or: [
-          { name: category },
-          { _id: mongoose.Types.ObjectId.isValid(category) ? category : null },
-        ],
-      });
-      if (categoryDoc) {
-        query.category = categoryDoc._id;
-      } else {
-        return res.status(404).json({ message: "Category not found" });
-      }
-    }
+    // Thêm URL đầy đủ cho hình ảnh sản phẩm
+    const updatedProducts = products.map((product) => ({
+      ...product._doc,
+      id: product._id, // Thêm ID vào dữ liệu trả về
+      images: product.images.map((image) => `${BASE_URL}/${image}`), // Thêm URL gốc
+    }));
 
-    // Lọc theo giá
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = parseFloat(minPrice);
-      if (maxPrice) query.price.$lte = parseFloat(maxPrice);
-    }
-
-    // Lọc theo trạng thái tồn kho
-    if (inStock) {
-      query.stock = inStock === "true" ? { $gt: 0 } : { $lte: 0 };
-    }
-
-    // Lọc theo attributes (Màu sắc và Kích thước)
-    if (color || size) {
-      query.attributes = { $elemMatch: {} };
-      if (color) {
-        query.attributes.$elemMatch.key = "Màu sắc";
-        query.attributes.$elemMatch.value = color; // Mã HEX hoặc tên màu
-      }
-      if (size) {
-        query.attributes.$elemMatch.key = "Kích thước";
-        query.attributes.$elemMatch.value = size;
-      }
-    }
-
-    // Cấu hình sắp xếp
-    const sortOptions = {};
-    if (sortBy === "newest") {
-      sortOptions.createdAt = -1; // Sắp xếp mới nhất
-    } else if (sortBy === "bestseller") {
-      sortOptions.sales = -1; // Sắp xếp theo số lượng bán ra
-    } else if (sortBy === "price") {
-      sortOptions.price = order === "asc" ? 1 : -1; // Giá tăng/giảm dần
-    } else if (sortBy === "name") {
-      sortOptions.name = order === "asc" ? 1 : -1; // Tên A-Z hoặc Z-A
-    }
-
-    // Phân trang (pagination)
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-
-    // Truy vấn sản phẩm
-    const products = await Product.find(query)
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(parseInt(limit))
-      .populate("category", "name"); // Lấy thông tin tên danh mục
-
-    // Tổng số sản phẩm thỏa mãn bộ lọc
-    const total = await Product.countDocuments(query);
-
-    // Trả về kết quả
-    res.status(200).json({
-      message: "Products retrieved successfully",
-      count: products.length,
-      total,
-      page: parseInt(page),
-      pages: Math.ceil(total / limit),
-      products,
-    });
+    // Trả về danh sách sản phẩm
+    res.status(200).json({ products: updatedProducts });
   } catch (error) {
-    console.error("Error retrieving filtered products:", error);
-    res.status(500).json({ message: "Failed to retrieve products", error });
+    console.error("Error fetching products:", error);
+    res.status(500).json({ message: "Error fetching products", error });
   }
 };
 
-module.exports = { getFilteredProducts };
+// Lấy sản phẩm theo ID
+const getProductById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Kiểm tra ID hợp lệ
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid product ID" });
+    }
+
+    // Tìm sản phẩm theo ID
+    const product = await Product.findById(id).populate("category", "name");
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Thêm URL đầy đủ cho hình ảnh
+    const updatedProduct = {
+      ...product._doc,
+      images: product.images.map((image) => `${BASE_URL}/${image}`),
+    };
+
+    // Trả về sản phẩm
+    res.status(200).json(updatedProduct);
+  } catch (error) {
+    console.error("Error fetching product by ID:", error);
+    res.status(500).json({ message: "Error fetching product by ID", error });
+  }
+};
+
+module.exports = {
+  getFilteredProducts,
+  getProductById,
+};

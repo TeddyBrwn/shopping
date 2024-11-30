@@ -1,0 +1,36 @@
+.search-results-container {
+  padding: 20px;
+  margin-top: 80px; /* Đảm bảo không bị dính vào header */
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Responsive */
+  gap: 20px;
+}
+
+.product-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  text-align: center;
+  padding: 10px;
+  background-color: #fff;
+}
+
+.product-card img {
+  width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng */
+  height: 200px; /* Chiều cao cố định */
+  object-fit: cover; /* Cắt ảnh phù hợp */
+  border-radius: 5px;
+}
+
+.product-card h3 {
+  font-size: 1.2rem;
+  margin: 10px 0;
+}
+
+.product-card p {
+  font-size: 1rem;
+  color: #333;
+}
