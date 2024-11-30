@@ -1,24 +1,56 @@
-// src/api/wishlistApi.js
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api/wishlist';
+const BASE_URL = 'http://localhost:3000/api/wishlist'; // URL API của Wishlist
 
-// Tạo Wishlist
-export const createWishlist = (wishlistData) => {
-  return axios.post(`${API_URL}`, wishlistData);
+// Hàm để thêm sản phẩm vào wishlist
+export const addToWishlist = async (wishlistItem) => {
+  try {
+    const response = await axios.post(BASE_URL, wishlistItem);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding item to wishlist:', error);
+    throw error;
+  }
 };
 
-// Lấy Wishlist
-export const getWishlist = () => {
-  return axios.get(`${API_URL}`);
+// Hàm để lấy tất cả sản phẩm trong wishlist
+export const getWishlist = async () => {
+  try {
+    const response = await axios.get(BASE_URL);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching wishlist items:', error);
+    throw error;
+  }
 };
 
-// Xóa Wishlist theo ID
-export const clearWishlistById = (wishlistId) => {
-  return axios.delete(`${API_URL}/${wishlistId}`);
+// Hàm để xóa sản phẩm khỏi wishlist
+export const clearWishlistById = async (itemId) => {
+  try {
+    await axios.delete(`${BASE_URL}/${itemId}`);
+  } catch (error) {
+    console.error('Error removing wishlist item:', error);
+    throw error;
+  }
 };
 
-// Xóa tất cả Wishlist
-export const clearAllWishlist = () => {
-  return axios.delete(`${API_URL}`);
+// Hàm để xóa toàn bộ wishlist (nếu cần)
+export const clearAllWishlist = async () => {
+  try {
+    await axios.delete(BASE_URL);
+  } catch (error) {
+    console.error('Error clearing wishlist:', error);
+    throw error;
+  }
+};
+
+// Hàm để tạo mới wishlist (thường là khi chưa có wishlist cho người dùng)
+export const createWishlist = async (wishlistData) => {
+  try {
+    const response = await axios.post(BASE_URL, wishlistData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating wishlist:', error);
+    throw error;
+  }
 };
