@@ -17,13 +17,8 @@ const ProductDetail = () => {
         const { data } = await API.get(`/user/products/${id}`);
         setProduct(data);
 
-        // Set giá trị mặc định cho kích thước và màu
-        const sizeAttribute = data.attributes.find(
-          (attr) => attr.key === "Kích thước"
-        );
-        const colorAttribute = data.attributes.find(
-          (attr) => attr.key === "Màu"
-        );
+        const sizeAttribute = data.attributes.find((attr) => attr.key === "Kích thước");
+        const colorAttribute = data.attributes.find((attr) => attr.key === "Màu");
 
         setSelectedSize(sizeAttribute?.value || null);
         setSelectedColor(colorAttribute?.value || null);
@@ -41,14 +36,32 @@ const ProductDetail = () => {
   if (loading) return <div>Loading sản phẩm...</div>;
   if (error) return <div>{error}</div>;
 
-  // Lấy danh sách màu sắc và kích thước từ attributes
-  const sizes = product.attributes
-    .filter((attr) => attr.key === "Kích thước")
-    .map((attr) => attr.value);
+  const handleAddToCart = async () => {
+    try {
+      const payload = {
+        productId: id,
+        quantity: 1,
+      };
+      await API.post("/cart", payload);
+      alert("Sản phẩm đã được thêm vào giỏ hàng!");
+    } catch (err) {
+      console.error("Error adding to cart:", err);
+      alert("Có lỗi xảy ra khi thêm vào giỏ hàng!");
+    }
+  };
 
-  const colors = product.attributes
-    .filter((attr) => attr.key === "Màu")
-    .map((attr) => attr.value);
+  const handleAddToWishlist = async () => {
+    try {
+      const payload = {
+        productId: id,
+      };
+      await API.post("/wishlist", payload);
+      alert("Sản phẩm đã được thêm vào mục yêu thích!");
+    } catch (err) {
+      console.error("Error adding to wishlist:", err);
+      alert("Có lỗi xảy ra khi thêm vào mục yêu thích!");
+    }
+  };
 
   return (
     <div className="product-detail-container">
@@ -77,21 +90,19 @@ const ProductDetail = () => {
           <div className="product-sizes">
             <h3>Chọn kích cỡ:</h3>
             <ul>
-              {sizes.length > 0 ? (
-                sizes.map((size) => (
+              {product.attributes
+                .filter((attr) => attr.key === "Kích thước")
+                .map((attr) => (
                   <li
-                    key={size}
+                    key={attr.value}
                     className={`size-option ${
-                      selectedSize === size ? "active" : ""
+                      selectedSize === attr.value ? "active" : ""
                     }`}
-                    onClick={() => setSelectedSize(size)}
+                    onClick={() => setSelectedSize(attr.value)}
                   >
-                    {size}
+                    {attr.value}
                   </li>
-                ))
-              ) : (
-                <p>Không có kích cỡ</p>
-              )}
+                ))}
             </ul>
           </div>
 
@@ -99,32 +110,37 @@ const ProductDetail = () => {
           <div className="product-colors">
             <h3>Chọn màu sắc:</h3>
             <ul>
-              {colors.length > 0 ? (
-                colors.map((color) => (
+              {product.attributes
+                .filter((attr) => attr.key === "Màu")
+                .map((attr) => (
                   <li
-                    key={color}
+                    key={attr.value}
                     className={`color-option ${
-                      selectedColor === color ? "active" : ""
+                      selectedColor === attr.value ? "active" : ""
                     }`}
-                    style={{ backgroundColor: color }}
-                    onClick={() => setSelectedColor(color)}
+                    style={{ backgroundColor: attr.value }}
+                    onClick={() => setSelectedColor(attr.value)}
                   ></li>
-                ))
-              ) : (
-                <p>Không có màu sắc</p>
-              )}
+                ))}
             </ul>
           </div>
 
-          {/* Nút thêm vào giỏ hàng */}
-          <button className="add-to-cart-btn">Thêm vào giỏ hàng</button>
+          {/* Nút thêm vào giỏ hàng và yêu thích */}
+          <div className="product-actions">
+            <button onClick={handleAddToCart} className="add-to-cart-btn">
+              Thêm vào giỏ hàng
+            </button>
+            <button onClick={handleAddToWishlist} className="add-to-wishlist-btn">
+              Thêm vào mục yêu thích
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Mô tả thêm */}
       <div className="product-detail-description">
         <h2>Mô tả sản phẩm</h2>
-        <p>{product.description || "Không có mô tả."}</p>
+        <p>{product.description || "- 2-WAY 100% COTTON - BOXY - CREWNECK- ARTWORK PRINTED AT FRONT- MADE IN VIET NAM"}</p>
       </div>
     </div>
   );
