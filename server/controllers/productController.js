@@ -68,7 +68,7 @@ exports.getProductById = async (req, res) => {
 //   }
 // };
 
-// // Cập nhật sản phẩm
+// Cập nhật sản phẩm
 // exports.updateProduct = async (req, res) => {
 //   const { name, description, price, category, stock, images, attributes } =
 //     req.body;
@@ -111,23 +111,28 @@ exports.getProductById = async (req, res) => {
 //   }
 // };
 exports.createProduct = [
-  upload.single("image"),
+  upload.single("image"), // Xử lý file upload
   async (req, res) => {
     try {
       const { name, price, stock, category, description, attributes } =
         req.body;
 
+      // Tạo sản phẩm mới
       const newProduct = new Product({
         name,
         price,
         stock,
-        category,
+        category, // category là ObjectId
         description,
-        attributes: JSON.parse(attributes),
-        images: req.file ? [req.file.path] : [],
+        attributes: Array.isArray(attributes)
+          ? attributes
+          : JSON.parse(attributes), // Kiểm tra và parse attributes
+        images: req.file ? [req.file.path] : [], // Thêm ảnh vào mảng
       });
 
+      // Lưu sản phẩm
       await newProduct.save();
+
       res.status(201).json(newProduct);
     } catch (error) {
       console.error("Error creating product:", error);
@@ -137,31 +142,41 @@ exports.createProduct = [
 ];
 
 exports.updateProduct = [
-  upload.single("image"),
+  upload.single("image"), // Middleware xử lý upload file
   async (req, res) => {
     try {
       const { name, price, stock, category, description, attributes } =
         req.body;
 
+      // Kiểm tra xem sản phẩm có tồn tại không
       const product = await Product.findById(req.params.id);
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
 
+      // Cập nhật các trường dữ liệu
       product.name = name || product.name;
       product.price = price || product.price;
       product.stock = stock || product.stock;
-      product.category = category || product.category;
+      product.category = category || product.category; // category là ObjectId
       product.description = description || product.description;
+
+      // Cập nhật attributes
       product.attributes = attributes
-        ? JSON.parse(attributes)
+        ? Array.isArray(attributes)
+          ? attributes
+          : JSON.parse(attributes)
         : product.attributes;
 
+      // Xử lý thêm ảnh nếu có
       if (req.file) {
-        product.images.push(req.file.path);
+        product.images.push(req.file.path); // Thêm ảnh mới vào mảng images
       }
 
+      // Lưu thay đổi
       await product.save();
+
+      // Phản hồi thành công
       res.status(200).json(product);
     } catch (error) {
       console.error("Error updating product:", error);

@@ -3,7 +3,7 @@ const path = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Thư mục lưu file
+    cb(null, "uploads/"); // Đường dẫn lưu ảnh
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
