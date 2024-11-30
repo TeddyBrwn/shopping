@@ -23,8 +23,8 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   animation: slideUp 0.3s ease-out;
   position: relative;
-  overflow-y: auto;  /* Cho phép cuộn dọc */
-  max-height: 80vh;  /* Giới hạn chiều cao của modal */
+  overflow-y: auto; /* Cho phép cuộn dọc */
+  max-height: 80vh; /* Giới hạn chiều cao của modal */
 }
 
 /* Close button */
@@ -167,12 +167,12 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   cursor: pointer;
-  margin-right: 10px;  /* Khoảng cách giữa ô chọn màu và ô chọn kích thước */
+  margin-right: 10px; /* Khoảng cách giữa ô chọn màu và ô chọn kích thước */
 }
 
 /* Ô chọn kích thước */
 .attribute-item select {
-  width: 130px;  /* Kích thước ô chọn kích thước rộng hơn */
+  width: 130px; /* Kích thước ô chọn kích thước rộng hơn */
   padding: 10px;
   font-size: 14px;
   border: 1px solid #ccc;

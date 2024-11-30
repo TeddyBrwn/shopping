@@ -1,5 +1,3 @@
-/* src/components/ProductList/ProductList.css */
-
 /* Vùng chứa danh sách sản phẩm */
 .product-list-container {
   padding: 20px;
@@ -16,11 +14,12 @@
   margin-bottom: 30px;
 }
 
-/* Lưới sản phẩm */
+/* Lưới sản phẩm - Luôn luôn 4 cột */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr); /* Luôn hiển thị 4 cột */
+  gap: 20px; /* Khoảng cách giữa các sản phẩm */
+  margin-top: 20px;
 }
 
 /* Card của từng sản phẩm */
@@ -30,8 +29,8 @@
   border-radius: 10px;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
   text-align: center;
+  padding: 20px 10px; /* Thêm padding để căn giữa nội dung */
 }
 
 .product-card:hover {
@@ -42,26 +41,14 @@
 /* Hình ảnh sản phẩm */
 .product-image {
   width: 100%;
-  height: 220px;
-  object-fit: cover;
-  border-bottom: 1px solid #e6e6e6;
-}
-
-/* Placeholder nếu không có hình ảnh */
-.product-placeholder {
-  width: 100%;
-  height: 220px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  color: #aaa;
-  background-color: #f9f9f9;
+  max-width: 180px; /* Đảm bảo ảnh vừa với nội dung */
+  height: auto; /* Tự động điều chỉnh chiều cao theo chiều rộng */
+  margin: 0 auto 15px; /* Căn giữa ảnh và thêm khoảng cách dưới */
 }
 
 /* Nội dung thẻ sản phẩm */
 .product-card-content {
-  padding: 15px;
+  padding: 10px 0;
 }
 
 /* Tên sản phẩm */
@@ -70,19 +57,31 @@
   font-weight: bold;
   color: #333;
   margin-bottom: 10px;
+  text-transform: capitalize; /* Viết hoa chữ cái đầu */
 }
 
 /* Giá sản phẩm */
 .product-price {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   color: #e74c3c;
   margin-bottom: 5px;
 }
 
-/* Giá cũ của sản phẩm (nếu có) */
-.product-old-price {
-  font-size: 0.9rem;
-  color: #999;
-  text-decoration: line-through;
-  margin-bottom: 10px;
+/* Responsive giữ nguyên 4 cột */
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(4, 1fr); /* Vẫn giữ nguyên 4 cột */
+  }
+
+  .product-image {
+    max-width: 140px; /* Giảm kích thước ảnh trên màn hình nhỏ */
+  }
+
+  .product-name {
+    font-size: 1rem;
+  }
+
+  .product-price {
+    font-size: 1rem;
+  }
 }
