@@ -9,27 +9,26 @@ function ProductList() {
   const [error, setError] = useState(""); // State lưu thông báo lỗi
   const [sortOption, setSortOption] = useState(""); // State lưu lựa chọn sắp xếp
 
-  // Gọi API khi trang được tải hoặc khi thay đổi tùy chọn sắp xếp
   useEffect(() => {
     fetchProducts(sortOption);
   }, [sortOption]);
 
-  // Hàm gọi API để lấy danh sách sản phẩm
   const fetchProducts = async (sort) => {
     setLoading(true);
     setError(""); // Reset lỗi trước khi gọi API
     try {
-      const response = await API.get(`user/products?sort=${sort || ""}`); // Gửi yêu cầu API kèm tham số sắp xếp
+      console.log("Sort Option:", sort); // Debug giá trị sort
+      const response = await API.get(`user/products?sort=${sort || ""}`);
+      console.log("API Response:", response.data); // Debug phản hồi API
       setProducts(response.data); // Cập nhật state với danh sách sản phẩm
     } catch (err) {
       console.error("Lỗi khi tải danh sách sản phẩm:", err);
-      setError("Không thể tải danh sách sản phẩm. Vui lòng thử lại sau."); // Cập nhật lỗi
+      setError("Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.");
     } finally {
-      setLoading(false); // Tắt trạng thái loading
+      setLoading(false);
     }
   };
 
-  // Hàm xử lý khi người dùng thay đổi tùy chọn sắp xếp
   const handleSortChange = (e) => {
     setSortOption(e.target.value); // Cập nhật tùy chọn sắp xếp
   };
@@ -46,9 +45,10 @@ function ProductList() {
         <label htmlFor="sort">Sắp xếp theo:</label>
         <select id="sort" onChange={handleSortChange} value={sortOption}>
           <option value="">Chọn...</option>
-          <option value="latest">Mới nhất</option>
-          <option value="price_asc">Giá tăng dần</option>
           <option value="price_desc">Giá giảm dần</option>
+          <option value="price_asc">Giá tăng dần</option>
+          <option value="latest">Mới nhất</option>
+          <option value="bestseller">Bán chạy</option>
         </select>
       </div>
 
