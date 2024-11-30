@@ -16,6 +16,17 @@ const ProductDetail = () => {
       try {
         const { data } = await API.get(`/user/products/${id}`);
         setProduct(data);
+
+        // Set giá trị mặc định cho kích thước và màu
+        const sizeAttribute = data.attributes.find(
+          (attr) => attr.key === "Kích thước"
+        );
+        const colorAttribute = data.attributes.find(
+          (attr) => attr.key === "Màu"
+        );
+
+        setSelectedSize(sizeAttribute?.value || null);
+        setSelectedColor(colorAttribute?.value || null);
       } catch (err) {
         console.error("Error fetching product:", err);
         setError("Có lỗi xảy ra khi tải thông tin sản phẩm!");
@@ -29,6 +40,15 @@ const ProductDetail = () => {
 
   if (loading) return <div>Loading sản phẩm...</div>;
   if (error) return <div>{error}</div>;
+
+  // Lấy danh sách màu sắc và kích thước từ attributes
+  const sizes = product.attributes
+    .filter((attr) => attr.key === "Kích thước")
+    .map((attr) => attr.value);
+
+  const colors = product.attributes
+    .filter((attr) => attr.key === "Màu")
+    .map((attr) => attr.value);
 
   return (
     <div className="product-detail-container">
@@ -49,23 +69,29 @@ const ProductDetail = () => {
         {/* Thông tin */}
         <div className="product-info-section">
           <h1 className="product-detail-title">{product.name}</h1>
-          <p className="product-detail-price">{product.price}₫</p>
+          <p className="product-detail-price">
+            {product.price.toLocaleString()}₫
+          </p>
 
-          {/* Chọn kích cỡ */}
+          {/* Chọn kích thước */}
           <div className="product-sizes">
             <h3>Chọn kích cỡ:</h3>
             <ul>
-              {product.sizes?.map((size) => (
-                <li
-                  key={size}
-                  className={`size-option ${
-                    selectedSize === size ? "active" : ""
-                  }`}
-                  onClick={() => setSelectedSize(size)}
-                >
-                  {size}
-                </li>
-              ))}
+              {sizes.length > 0 ? (
+                sizes.map((size) => (
+                  <li
+                    key={size}
+                    className={`size-option ${
+                      selectedSize === size ? "active" : ""
+                    }`}
+                    onClick={() => setSelectedSize(size)}
+                  >
+                    {size}
+                  </li>
+                ))
+              ) : (
+                <p>Không có kích cỡ</p>
+              )}
             </ul>
           </div>
 
@@ -73,16 +99,20 @@ const ProductDetail = () => {
           <div className="product-colors">
             <h3>Chọn màu sắc:</h3>
             <ul>
-              {product.colors?.map((color) => (
-                <li
-                  key={color}
-                  className={`color-option ${
-                    selectedColor === color ? "active" : ""
-                  }`}
-                  style={{ backgroundColor: color.toLowerCase() }}
-                  onClick={() => setSelectedColor(color)}
-                ></li>
-              ))}
+              {colors.length > 0 ? (
+                colors.map((color) => (
+                  <li
+                    key={color}
+                    className={`color-option ${
+                      selectedColor === color ? "active" : ""
+                    }`}
+                    style={{ backgroundColor: color }}
+                    onClick={() => setSelectedColor(color)}
+                  ></li>
+                ))
+              ) : (
+                <p>Không có màu sắc</p>
+              )}
             </ul>
           </div>
 
@@ -94,7 +124,7 @@ const ProductDetail = () => {
       {/* Mô tả thêm */}
       <div className="product-detail-description">
         <h2>Mô tả sản phẩm</h2>
-        <p>{product.description}</p>
+        <p>{product.description || "Không có mô tả."}</p>
       </div>
     </div>
   );
