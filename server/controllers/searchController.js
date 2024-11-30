@@ -18,13 +18,13 @@ const getFilteredProducts = async (req, res) => {
       order = "asc",
       page = 1,
       limit = 10,
-      color, // Lọc theo Màu sắc
-      size, // Lọc theo Kích thước
+      color,
+      size,
     } = req.query;
 
-    // Bộ lọc tìm kiếm
+    // Tạo bộ lọc tìm kiếm
     const filter = {};
-    if (search) filter.name = { $regex: search, $options: "i" }; // Tìm kiếm theo tên
+    if (search) filter.name = { $regex: search, $options: "i" }; // Tìm kiếm theo tên (không phân biệt hoa/thường)
     if (category) filter.category = category; // Lọc theo danh mục
     if (minPrice) filter.price = { $gte: minPrice }; // Giá thấp nhất
     if (maxPrice) filter.price = { ...filter.price, $lte: maxPrice }; // Giá cao nhất
@@ -32,18 +32,42 @@ const getFilteredProducts = async (req, res) => {
     if (color) filter.color = color; // Lọc theo màu sắc
     if (size) filter.size = size; // Lọc theo kích thước
 
+    // Xác định sắp xếp
+    let sortOptions = {};
+    switch (sortBy) {
+      case "latest":
+        sortOptions = { createdAt: -1 }; // Mới nhất
+        break;
+      case "bestseller":
+        sortOptions = { sold: -1 }; // Bán chạy
+        break;
+      case "price_asc":
+        sortOptions = { price: 1 }; // Giá tăng dần
+        break;
+      case "price_desc":
+        sortOptions = { price: -1 }; // Giá giảm dần
+        break;
+      case "az":
+        sortOptions = { name: 1 }; // Từ A-Z
+        break;
+      case "za":
+        sortOptions = { name: -1 }; // Từ Z-A
+        break;
+      default:
+        sortOptions = {}; // Không sắp xếp
+    }
+
     // Lấy danh sách sản phẩm từ cơ sở dữ liệu
     const products = await Product.find(filter)
-      .populate("category", "name") // Lấy thông tin danh mục
-      .sort({ [sortBy]: order === "asc" ? 1 : -1 }) // Sắp xếp
+      .populate("category", "name") // Lấy tên danh mục
+      .sort(sortOptions) // Sắp xếp sản phẩm
       .skip((page - 1) * limit) // Phân trang
       .limit(Number(limit));
 
-    // Thêm URL đầy đủ cho hình ảnh sản phẩm
+    // Xử lý dữ liệu sản phẩm, thêm URL đầy đủ cho hình ảnh
     const updatedProducts = products.map((product) => ({
       ...product._doc,
-      id: product._id, // Thêm ID vào dữ liệu trả về
-      images: product.images.map((image) => `${BASE_URL}/${image}`), // Thêm URL gốc
+      images: product.images.map((image) => `${BASE_URL}/${image}`), // Thêm URL gốc cho hình ảnh
     }));
 
     // Trả về danh sách sản phẩm
