@@ -50,6 +50,7 @@ const ProductDetail = () => {
       alert('Sản phẩm đã được thêm vào giỏ hàng thành công!');
     } catch (error) {
       console.error('Error adding item to cart:', error);
+      console.log('Chi tiết lỗi:', error.response ? error.response.data : error.message);
       alert('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.');
     }
   };
@@ -65,6 +66,7 @@ const ProductDetail = () => {
       alert('Sản phẩm đã được thêm vào mục yêu thích!');
     } catch (error) {
       console.error('Error adding item to wishlist:', error);
+      console.log('Chi tiết lỗi:', error.response ? error.response.data : error.message);
       alert('Có lỗi xảy ra khi thêm sản phẩm vào wishlist.');
     }
   };
