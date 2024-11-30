@@ -8,7 +8,6 @@ const SearchResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Lấy từ khóa tìm kiếm từ URL
   const query = new URLSearchParams(location.search).get("query");
 
   useEffect(() => {
@@ -21,7 +20,7 @@ const SearchResults = () => {
           `http://localhost:3000/api/search?search=${query}`
         );
         const data = await response.json();
-        setProducts(data.products || []); // Lưu danh sách sản phẩm
+        setProducts(data.products || []);
       } catch (error) {
         console.error("Error fetching search results:", error);
         setProducts([]);
@@ -34,7 +33,11 @@ const SearchResults = () => {
   }, [query]);
 
   const handleProductClick = (productId) => {
-    navigate(`/product/${productId}`); // Điều hướng đến trang chi tiết sản phẩm
+    if (!productId) {
+      console.error("Invalid product ID:", productId);
+      return;
+    }
+    navigate(`/product/${productId}`);
   };
 
   return (
@@ -46,15 +49,15 @@ const SearchResults = () => {
         <div className="products-grid">
           {products.map((product) => (
             <div
-              key={product.id}
+              key={product.id || product._id}
               className="product-card"
-              onClick={() => handleProductClick(product.id)} // Điều hướng khi nhấp vào sản phẩm
+              onClick={() => handleProductClick(product.id || product._id)}
             >
               <img
                 src={product?.images && product.images[0]}
                 alt={product?.name}
                 onError={(e) => {
-                  e.target.src = "https://via.placeholder.com/150"; // Hình mặc định nếu không tải được
+                  e.target.src = "https://via.placeholder.com/150";
                 }}
               />
               <h3>{product.name}</h3>
