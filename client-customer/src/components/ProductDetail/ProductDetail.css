@@ -1,63 +1,4 @@
-/* src/components/ProductDetail/ProductDetail.css */
-
-.product-detail-container {
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.product-detail-content {
-  display: flex;
-  flex-direction: row;
-  width: 80%;
-  gap: 2rem;
-  max-width: 1200px;
-}
-
-.product-image-section {
-  flex: 1;
-}
-
-.product-detail-image {
-  width: 100%;
-  height: auto;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.product-info-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.product-detail-title {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.product-detail-price {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.product-sale-price {
-  color: #e74c3c;
-  font-weight: bold;
-  margin-right: 0.5rem;
-}
-
-.product-original-price {
-  text-decoration: line-through;
-  color: #b2b2b2;
-}
-
-.product-detail-description {
-  font-size: 1.2rem;
-  margin-bottom: 1.5rem;
-}
-
+/* Kích cỡ */
 .product-sizes h3 {
   margin-bottom: 0.5rem;
 }
@@ -76,6 +17,40 @@
   transition: background 0.3s, color 0.3s;
 }
 
+.product-sizes li.active {
+  background: #000;
+  color: #fff;
+}
+
 .product-sizes li:hover {
   background: #f0f0f0;
+}
+
+/* Màu sắc */
+.product-colors h3 {
+  margin-bottom: 0.5rem;
+}
+
+.product-colors ul {
+  list-style: none;
+  padding: 0;
+}
+
+.product-colors li {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  margin: 0.5rem;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.product-colors li.active {
+  border: 2px solid #000;
+  transform: scale(1.1);
+}
+
+.product-colors li:hover {
+  transform: scale(1.1);
 }

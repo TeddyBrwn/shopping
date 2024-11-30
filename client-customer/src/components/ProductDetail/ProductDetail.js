@@ -1,26 +1,24 @@
-// src/components/ProductDetail/ProductDetail.js
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import API from "../../api/api";
-import "./ProductDetail.css"; // CSS cho ProductDetail
+import "./ProductDetail.css";
 
 const ProductDetail = () => {
-  const { id } = useParams(); // Lấy product ID từ URL
+  const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Fetch product details từ API
     const fetchProduct = async () => {
       try {
-        console.log("Fetching product details for ID:", id);
         const { data } = await API.get(`/user/products/${id}`);
-        console.log("Product data fetched:", data);
-        setProduct(data); // Cập nhật state với dữ liệu sản phẩm
+        setProduct(data);
       } catch (err) {
         console.error("Error fetching product:", err);
-        setError(err.message || "Có lỗi xảy ra khi lấy thông tin sản phẩm!");
+        setError("Có lỗi xảy ra khi tải thông tin sản phẩm!");
       } finally {
         setLoading(false);
       }
@@ -29,31 +27,74 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
-  if (loading) return <p>Loading...</p>; // Hiển thị loading khi đang fetch dữ liệu
-  if (error) return <p>Error: {error}</p>; // Hiển thị lỗi nếu có
-  if (!product) return <p>Không tìm thấy sản phẩm</p>; // Trường hợp không có sản phẩm
+  if (loading) return <div>Loading sản phẩm...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <div className="product-detail-container">
-      <div className="product-detail-image">
-        <img src={product.image} alt={product.name} />
+      <div className="product-detail-content">
+        {/* Hình ảnh */}
+        <div className="product-image-section">
+          <img
+            src={
+              Array.isArray(product.images) && product.images.length > 0
+                ? product.images[0]
+                : "/no-image.png"
+            }
+            alt={product.name}
+            className="product-detail-image"
+          />
+        </div>
+
+        {/* Thông tin */}
+        <div className="product-info-section">
+          <h1 className="product-detail-title">{product.name}</h1>
+          <p className="product-detail-price">{product.price}₫</p>
+
+          {/* Chọn kích cỡ */}
+          <div className="product-sizes">
+            <h3>Chọn kích cỡ:</h3>
+            <ul>
+              {product.sizes?.map((size) => (
+                <li
+                  key={size}
+                  className={`size-option ${
+                    selectedSize === size ? "active" : ""
+                  }`}
+                  onClick={() => setSelectedSize(size)}
+                >
+                  {size}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Chọn màu sắc */}
+          <div className="product-colors">
+            <h3>Chọn màu sắc:</h3>
+            <ul>
+              {product.colors?.map((color) => (
+                <li
+                  key={color}
+                  className={`color-option ${
+                    selectedColor === color ? "active" : ""
+                  }`}
+                  style={{ backgroundColor: color.toLowerCase() }}
+                  onClick={() => setSelectedColor(color)}
+                ></li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Nút thêm vào giỏ hàng */}
+          <button className="add-to-cart-btn">Thêm vào giỏ hàng</button>
+        </div>
       </div>
-      <div className="product-detail-info">
-        <h2 className="product-detail-title">{product.name}</h2>
-        <p className="product-detail-price">{product.price} VND</p>
-        <p className="product-detail-description">{product.description}</p>
-        <div className="product-sizes">
-          <h4>Chọn kích cỡ:</h4>
-          {product.sizes?.map((size) => (
-            <button key={size} className="size-button">
-              {size}
-            </button>
-          ))}
-        </div>
-        <div className="product-quantity">
-          <label htmlFor="quantity">Số lượng:</label>
-          <input type="number" id="quantity" min="1" defaultValue="1" />
-        </div>
+
+      {/* Mô tả thêm */}
+      <div className="product-detail-description">
+        <h2>Mô tả sản phẩm</h2>
+        <p>{product.description}</p>
       </div>
     </div>
   );

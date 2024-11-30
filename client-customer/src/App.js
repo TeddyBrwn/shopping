@@ -14,7 +14,7 @@ import RequestPasswordReset from "./components/RequestPasswordReset/RequestPassw
 import ResetPassword from "./components/ResetPassword/ResetPassword";
 import Verify from "./components/Verify/Verify";
 import SearchResults from "./components/SearchResults/SearchResults"; // Import đúng tên SearchResults
-import { AuthProvider } from "./contexts/AuthContext"; 
+import { AuthProvider } from "./contexts/AuthContext";
 import "./App.css";
 
 function App() {
@@ -30,40 +30,53 @@ function App() {
             <Routes>
               {/* Trang chủ */}
               <Route path="/" element={<HomePage />} />
-
               {/* Trang sản phẩm theo danh mục */}
-              <Route path="/products/all" element={<ProductList category="all" />} />
-              <Route path="/products/men" element={<ProductList category="men" />} />
-              <Route path="/products/women" element={<ProductList category="women" />} />
-              <Route path="/products/outwear" element={<ProductList category="outwear" />} />
-              <Route path="/products/accessories" element={<ProductList category="accessories" />} />
-
+              <Route
+                path="/products/all"
+                element={<ProductList category="all" />}
+              />
+              <Route
+                path="/products/men"
+                element={<ProductList category="men" />}
+              />
+              <Route
+                path="/products/women"
+                element={<ProductList category="women" />}
+              />
+              <Route
+                path="/products/outwear"
+                element={<ProductList category="outwear" />}
+              />
+              <Route
+                path="/products/accessories"
+                element={<ProductList category="accessories" />}
+              />
+              <Route path="/" element={<ProductList />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
               {/* Chi tiết sản phẩm */}
               <Route path="/product/:id" element={<ProductDetail />} />
-
               {/* Trang giỏ hàng */}
               <Route path="/cart" element={<CartPage />} />
-
               {/* Danh sách yêu thích */}
               <Route path="/wishlist" element={<WishlistPage />} />
-
               {/* Đăng nhập */}
               <Route path="/login" element={<LoginPage />} />
-
               {/* Đăng ký */}
               <Route path="/register" element={<Register />} />
-
               {/* Khôi phục mật khẩu */}
-              <Route path="/request-password-reset" element={<RequestPasswordReset />} />
-              <Route path="/reset-password/:token" element={<ResetPassword />} />
-
+              <Route
+                path="/request-password-reset"
+                element={<RequestPasswordReset />}
+              />
+              <Route
+                path="/reset-password/:token"
+                element={<ResetPassword />}
+              />
               {/* Xác minh tài khoản */}
               <Route path="/verify" element={<Verify />} />
-
-
               {/* Trang kết quả tìm kiếm */}
-              <Route path="/search" element={<SearchResults />} /> {/* Cập nhật thành SearchResults */}
-
+              <Route path="/search" element={<SearchResults />} />{" "}
+              {/* Cập nhật thành SearchResults */}
               {/* Trang không tìm thấy - điều hướng về trang chủ */}
               <Route path="*" element={<HomePage />} />
             </Routes>
