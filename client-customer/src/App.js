@@ -13,8 +13,9 @@ import WishlistPage from "./components/Wishlist/Wishlist";
 import RequestPasswordReset from "./components/RequestPasswordReset/RequestPasswordReset";
 import ResetPassword from "./components/ResetPassword/ResetPassword";
 import Verify from "./components/Verify/Verify";
-import SearchResults from "./components/SearchResults/SearchResults"; // Import đúng tên SearchResults
 import { AuthProvider } from "./contexts/AuthContext";
+import SearchResults from "./components/Search/SearchResults";
+
 import "./App.css";
 
 function App() {
@@ -75,7 +76,7 @@ function App() {
               {/* Xác minh tài khoản */}
               <Route path="/verify" element={<Verify />} />
               {/* Trang kết quả tìm kiếm */}
-              <Route path="/search" element={<SearchResults />} />{" "}
+              <Route path="/search-results" element={<SearchResults />} />
               {/* Cập nhật thành SearchResults */}
               {/* Trang không tìm thấy - điều hướng về trang chủ */}
               <Route path="*" element={<HomePage />} />

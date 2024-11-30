@@ -1,15 +1,21 @@
-// src/components/Header/Header.js
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faSearch, faShoppingCart, faUser, faHeart, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBars,
+  faSearch,
+  faShoppingCart,
+  faUser,
+  faHeart,
+  faSignOutAlt,
+} from "@fortawesome/free-solid-svg-icons";
 import "./Header.css";
 import { Link, useNavigate } from "react-router-dom";
+import SearchModal from "../Search/SearchModal"; // Import modal tìm kiếm
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); 
-  const [showSearchBar, setShowSearchBar] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(""); 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -44,16 +50,6 @@ function Header() {
     }
   };
 
-  const toggleSearchBar = () => {
-    setShowSearchBar((prevShowSearchBar) => !prevShowSearchBar);
-  };
-
-  const handleSearchRedirect = () => {
-    if (searchTerm.trim() !== "") {
-      navigate(`/search?query=${searchTerm}`);
-    }
-  };
-
   return (
     <>
       <header className="header-container">
@@ -64,11 +60,21 @@ function Header() {
         </div>
 
         <div className="header-logo">
-          <Link to="/" className="shop-name">SHOP CLOTHING</Link>
+          <Link to="/" className="shop-name">
+            SHOP CLOTHING
+          </Link>
         </div>
 
         <div className="header-icons">
-          <div className="header-icon" onClick={toggleSearchBar}>
+          <div
+            className="header-icon"
+            onClick={() => {
+              setIsSearchOpen(true);
+              console.log("Search modal opened:", isSearchOpen); // Debug log
+            }}
+            title="Search"
+            style={{ cursor: "pointer" }}
+          >
             <FontAwesomeIcon icon={faSearch} />
           </div>
           <Link to="/wishlist" className="header-icon">
@@ -90,42 +96,46 @@ function Header() {
         </div>
       </header>
 
-      {showSearchBar && (
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Tìm kiếm sản phẩm..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <button className="search-submit" onClick={handleSearchRedirect}>
-            <FontAwesomeIcon icon={faSearch} />
-          </button>
-        </div>
-      )}
-
       <nav className={`horizontal-menu ${isMenuOpen ? "open" : ""}`}>
         <ul>
           <li>
-            <Link to="/" onClick={closeMenu}>Home</Link>
+            <Link to="/" onClick={closeMenu}>
+              Home
+            </Link>
           </li>
           <li>
-            <Link to="/products/all" onClick={closeMenu}>All Products</Link>
+            <Link to="/products/all" onClick={closeMenu}>
+              All Products
+            </Link>
           </li>
           <li>
-            <Link to="/products/men" onClick={closeMenu}>Men</Link>
+            <Link to="/products/men" onClick={closeMenu}>
+              Men
+            </Link>
           </li>
           <li>
-            <Link to="/products/women" onClick={closeMenu}>Women</Link>
+            <Link to="/products/women" onClick={closeMenu}>
+              Women
+            </Link>
           </li>
           <li>
-            <Link to="/products/outwear" onClick={closeMenu}>Outwear</Link>
+            <Link to="/products/outwear" onClick={closeMenu}>
+              Outwear
+            </Link>
           </li>
           <li>
-            <Link to="/products/accessories" onClick={closeMenu}>Accessories</Link>
+            <Link to="/products/accessories" onClick={closeMenu}>
+              Accessories
+            </Link>
           </li>
         </ul>
       </nav>
+
+      {/* Modal Tìm Kiếm */}
+      <SearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
     </>
   );
 }
