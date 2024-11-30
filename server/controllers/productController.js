@@ -10,7 +10,6 @@ exports.getProducts = async (req, res) => {
   try {
     const products = await Product.find().populate("category", "name");
 
-    // Chuyển đường dẫn ảnh thành URL đầy đủ
     const updatedProducts = products.map((product) => ({
       ...product._doc,
       images: product.images.map(
@@ -36,7 +35,6 @@ exports.getProductById = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // Chuyển đường dẫn ảnh thành URL đầy đủ
     product.images = product.images.map(
       (image) => `${req.protocol}://${req.get("host")}/${image}`
     );
@@ -50,13 +48,12 @@ exports.getProductById = async (req, res) => {
 
 // Tạo sản phẩm mới
 exports.createProduct = [
-  upload.single("image"), // Middleware xử lý upload file
+  upload.single("image"),
   async (req, res) => {
     try {
       const { name, price, stock, category, description, attributes } =
         req.body;
 
-      // Tạo sản phẩm mới
       const newProduct = new Product({
         name,
         price,
@@ -65,11 +62,10 @@ exports.createProduct = [
         description,
         attributes: Array.isArray(attributes)
           ? attributes
-          : JSON.parse(attributes), // Kiểm tra và parse attributes
-        images: req.file ? [req.file.path] : [], // Thêm ảnh vào mảng
+          : JSON.parse(attributes),
+        images: req.file ? [req.file.path] : [],
       });
 
-      // Lưu sản phẩm
       await newProduct.save();
 
       res.status(201).json(newProduct);
@@ -82,26 +78,23 @@ exports.createProduct = [
 
 // Cập nhật sản phẩm
 exports.updateProduct = [
-  upload.single("image"), // Middleware xử lý upload file
+  upload.single("image"),
   async (req, res) => {
     try {
       const { name, price, stock, category, description, attributes } =
         req.body;
 
-      // Kiểm tra xem sản phẩm có tồn tại không
       const product = await Product.findById(req.params.id);
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
 
-      // Cập nhật các trường dữ liệu
       product.name = name || product.name;
       product.price = price || product.price;
       product.stock = stock || product.stock;
-      product.category = category || product.category; // category là ObjectId
+      product.category = category || product.category;
       product.description = description || product.description;
 
-      // Cập nhật attributes
       product.attributes = attributes
         ? Array.isArray(attributes)
           ? attributes
@@ -110,12 +103,10 @@ exports.updateProduct = [
           : product.attributes
         : product.attributes;
 
-      // Xử lý thêm ảnh nếu có
       if (req.file) {
-        product.images.push(req.file.path); // Thêm ảnh mới vào mảng images
+        product.images.push(req.file.path);
       }
 
-      // Nếu cần xóa ảnh cũ, nhận danh sách ảnh cần giữ từ body
       if (req.body.imagesToKeep) {
         const imagesToKeep = JSON.parse(req.body.imagesToKeep);
         product.images = product.images.filter((image) =>
@@ -123,10 +114,8 @@ exports.updateProduct = [
         );
       }
 
-      // Lưu thay đổi
       await product.save();
 
-      // Phản hồi thành công
       res.status(200).json(product);
     } catch (error) {
       console.error("Error updating product:", error);
@@ -143,7 +132,6 @@ exports.deleteProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // Xóa các file ảnh trong thư mục uploads
     product.images.forEach((image) => {
       const filePath = path.join(__dirname, "../", image);
       if (fs.existsSync(filePath)) {
@@ -160,14 +148,13 @@ exports.deleteProduct = async (req, res) => {
 
 // Xóa nhiều sản phẩm
 exports.deleteMultipleProducts = async (req, res) => {
-  const { ids } = req.body; // Danh sách ID sản phẩm cần xóa
+  const { ids } = req.body;
   if (!ids || !Array.isArray(ids)) {
     return res.status(400).json({ message: "IDs must be an array" });
   }
   try {
     const products = await Product.find({ _id: { $in: ids } });
 
-    // Xóa các file ảnh liên quan
     products.forEach((product) => {
       product.images.forEach((image) => {
         const filePath = path.join(__dirname, "../", image);
