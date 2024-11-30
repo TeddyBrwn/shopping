@@ -6,10 +6,52 @@ const fs = require("fs");
 const path = require("path");
 
 // Lấy danh sách sản phẩm
+// exports.getProducts = async (req, res) => {
+//   try {
+//     const products = await Product.find().populate("category", "name");
+
+//     const updatedProducts = products.map((product) => ({
+//       ...product._doc,
+//       images: product.images.map(
+//         (image) => `${req.protocol}://${req.get("host")}/${image}`
+//       ),
+//     }));
+
+//     res.status(200).json(updatedProducts);
+//   } catch (error) {
+//     console.error("Error retrieving products:", error);
+//     res.status(500).json({ message: "Failed to retrieve products", error });
+//   }
+// };
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate("category", "name");
+    const { sort } = req.query; // Lấy tham số 'sort' từ query string
 
+    // Xác định tiêu chí sắp xếp
+    let sortOptions = {};
+    switch (sort) {
+      case "price_asc":
+        sortOptions = { price: 1 }; // Giá tăng dần
+        break;
+      case "price_desc":
+        sortOptions = { price: -1 }; // Giá giảm dần
+        break;
+      case "latest":
+        sortOptions = { createdAt: -1 }; // Mới nhất
+        break;
+      case "bestseller":
+        sortOptions = { sold: -1 }; // Bán chạy
+        break;
+      default:
+        sortOptions = {}; // Không sắp xếp
+    }
+
+    // Lấy sản phẩm từ MongoDB và sắp xếp
+    const products = await Product.find()
+      .populate("category", "name")
+      .sort(sortOptions); // Thêm tùy chọn sắp xếp vào query
+
+    // Cập nhật đường dẫn hình ảnh
     const updatedProducts = products.map((product) => ({
       ...product._doc,
       images: product.images.map(
@@ -17,6 +59,7 @@ exports.getProducts = async (req, res) => {
       ),
     }));
 
+    // Trả về danh sách sản phẩm đã xử lý
     res.status(200).json(updatedProducts);
   } catch (error) {
     console.error("Error retrieving products:", error);
